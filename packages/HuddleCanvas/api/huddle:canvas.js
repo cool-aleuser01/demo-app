@@ -521,7 +521,109 @@ HuddleCanvas = (function() {
         var move_scaleOffsetX = 0;
         var move_scaleOffsetY = 0;
 
+        var counter2 = 0;
 
+        PanPosition.find({ sessionId: sessionServer }).observe({
+
+          changed: function (newDocument, atIndex, oldDocument) {
+
+            // if (++counter2 % 30 != 0) return;
+
+            var offsets = newDocument;
+
+            // console.log('changed');
+
+            var move_offsetX = 0;
+            var move_offsetY = 0;
+            var move_inPanOffsetX = 0;
+            var move_inPanOffsetY = 0;
+            var move_rotationOffset = 0;
+            var move_finalRotationOffset = 0;
+            var move_rotationOffsetX = 0;
+            var move_rotationOffsetY = 0;
+            var move_scaleOffset = 1;
+            var move_finalScaleOffset = 1;
+            var move_scaleOffsetX = 0;
+            var move_scaleOffsetY = 0;
+
+            if (offsets) {
+              move_offsetX = offsets.offsetX;
+              move_offsetY = offsets.offsetY;
+              move_inPanOffsetX = offsets.inPanOffsetX;
+              move_inPanOffsetY = offsets.inPanOffsetY;
+              move_rotationOffset = offsets.rotationOffset;
+              move_finalRotationOffset = offsets.finalRotationOffset;
+              move_rotationOffsetX = offsets.rotationOffsetX;
+              move_rotationOffsetY = offsets.rotationOffsetY;
+              move_scaleOffset = offsets.scaleOffset;
+              move_finalScaleOffset = offsets.finalScaleOffset;
+              move_scaleOffsetX = offsets.scaleOffsetX;
+              move_scaleOffsetY = offsets.scaleOffsetY;
+
+              //set for getters too
+              finalScaleOffset = offsets.finalScaleOffset;
+              finalRotationOffset = offsets.finalRotationOffset;
+            }
+
+            //setup the variables to translate our canvas
+            var tx = (-1 * x * feedWidth) + move_offsetX + move_inPanOffsetX;
+            var ty = (-1 * y * feedHeight) + move_offsetY + move_inPanOffsetY;
+
+            if (deviceCenterToDeviceLeft && deviceCenterToDeviceTop) {
+              var txd = tx + deviceCenterToDeviceLeft;
+              var tyd = ty + deviceCenterToDeviceTop;
+            } else {
+              var txd = tx;
+              var tyd = ty;
+            }
+
+
+            var containerWidth = $('#' + huddleContainerId).width() / 2;
+            var containerHeight = $('#' + huddleContainerId).height() / 2;
+
+
+            //set the offset of the canvas so its physical position changes
+            coordX = txd;
+            coordY = tyd;
+            $(id).css('top', tyd);
+            $(id).css('left', txd);
+
+
+
+            //Handle the rotation of the canvas
+            //var existingCanvasAngle = getCanvasAngle();
+            var rotationX = -tx;
+            var rotationY = -ty;
+
+
+            //Apply the transformations according to what settings are enabled
+            var transformationString = 'translate(' + (-(containerWidth - rotationX)) + 'px,' + (-(containerHeight - rotationY)) + 'px)' +
+            'rotate(' + (-(rotation)) + 'deg)' +
+            'translate(' + (containerWidth - rotationX) + 'px,' + (containerHeight - rotationY) + 'px)';
+
+            if (settings.rotationEnabled) {
+              transformationString += 'translate(' + (-(containerWidth - move_rotationOffsetX)) + 'px,' + (-(containerHeight - move_rotationOffsetY)) + 'px)' +
+              'rotate(' + (move_rotationOffset + move_finalRotationOffset) + 'deg)' +
+              'translate(' + (containerWidth - move_rotationOffsetX) + 'px,' + (containerHeight - move_rotationOffsetY) + 'px)';
+            }
+
+            transformationString += 'scale(' + scaleX + ',' + scaleY + ') ';
+
+            if (settings.scalingEnabled) {
+              transformationString += 'translate(' + (-(containerWidth - move_scaleOffsetX)) + 'px,' + (-(containerHeight - move_scaleOffsetY)) + 'px)' +
+              'scale(' + move_scaleOffset * move_finalScaleOffset + ',' + move_scaleOffset * move_finalScaleOffset + ')' +
+              'translate(' + ((containerWidth - move_scaleOffsetX)) + 'px,' + ((containerHeight - move_scaleOffsetY)) + 'px)';
+
+            }
+
+            applyAllBrowsers(id, 'transform', transformationString);
+
+            //do on move callback
+            if (!firstRun) {
+              settings.onMoveCallback();
+            }
+          }
+        });
 
         //offsetX and offsetY take into account touch panning, we need to get them from our meteor collection so it's synced across all devices in the huddle
         if (settings.panningEnabled === true) {

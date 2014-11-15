@@ -44,12 +44,13 @@ if (Meteor.isClient) {
     }
   };
 
-  var createCanvas = function(newhost, newport, newappmode) {  
+  var createCanvas = function(newhost, newport, newappmode) {
     // canvas = HuddleCanvas.create("orbiter.huddlelamp.org", 53084,
     var newcanvas = HuddleCanvas.create(newhost, newport, {
       scalingEnabled: (newappmode == WALDO) ? false : true,
-      rotationEnabled: false,
+      rotationEnabled: true,
       panningEnabled: (newappmode == WALDO) ? false : true,
+      disableFlickPan: true,
       useTiles: false,
       showDebugBox: true,
       accStabilizerEnabled: true,
@@ -58,13 +59,13 @@ if (Meteor.isClient) {
       layers: ["ui-layer"]
     });
 
-    return newcanvas; 
+    return newcanvas;
   };
 
 
   // make canvas accessible outside of the createCanvas function
   var canvas;
-  
+
   /**
    * Do connect after main application rendered.
    */
@@ -134,4 +135,3 @@ if (Meteor.isClient) {
     }
   });
 }
-
