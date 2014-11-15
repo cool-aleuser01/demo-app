@@ -4,6 +4,9 @@ if (Meteor.isClient) {
   var MAP = 1;
   var appMode = MAP;
 
+  // make canvas accessible outside of the createCanvas function
+  var canvas;
+
   /**
    * Get url parameter, e.g., http://localhost:3000/?id=3 -> id = 3
    *
@@ -33,7 +36,7 @@ if (Meteor.isClient) {
     }
 
     if (host && port) {
-      createCanvas(host, port, appMode);
+      canvas = createCanvas(host, port, appMode);
     }
     else {
       $('#connection-dialog').modal({
@@ -44,12 +47,13 @@ if (Meteor.isClient) {
     }
   };
 
-  var createCanvas = function(newhost, newport, newappmode) {  
+  var createCanvas = function(newhost, newport, newappmode) {
     // canvas = HuddleCanvas.create("orbiter.huddlelamp.org", 53084,
-    canvas = HuddleCanvas.create(newhost, newport, {
-      scalingEnabled: false,
-      rotationEnabled: false,
+    var canvas = HuddleCanvas.create(newhost, newport, {
+      scalingEnabled: (newappmode == WALDO) ? false : true,
+      rotationEnabled: true,
       panningEnabled: (newappmode == WALDO) ? false : true,
+      disableFlickPan: true,
       useTiles: false,
       showDebugBox: true,
       accStabilizerEnabled: true,
@@ -58,13 +62,11 @@ if (Meteor.isClient) {
       layers: ["ui-layer"]
     });
 
-    return newcanvas; 
+    return canvas;
   };
 
 
-  // make canvas accessible outside of the createCanvas function
-  var canvas;
-  
+
   /**
    * Do connect after main application rendered.
    */
@@ -125,7 +127,7 @@ if (Meteor.isClient) {
 
   // Legend button
   Template.canvas.events({
-    'touchend #waldo-button-icon-div': function(e, tmpl) {
+    'touchstart #waldo-button-icon-div': function(e, tmpl) {
       canvas.disableInteraction();
 
       $('#waldo-dialog').modal({
@@ -138,11 +140,10 @@ if (Meteor.isClient) {
 
   Template.waldoDialog.events({
 
-    'click .dismiss-waldo-dialog': function(e, tmpl) {
+    'touchstart .dismiss-waldo-dialog': function(e, tmpl) {
       $('#waldo-dialog').modal('hide'); 
 
       canvas.enableInteraction();
     }
   });
 }
-

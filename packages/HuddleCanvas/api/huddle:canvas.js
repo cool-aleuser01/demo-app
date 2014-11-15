@@ -28,6 +28,8 @@ HuddleCanvas = (function() {
   //holds huddle data for getter
   var getterData = {};
 
+  var moveData;
+
 
   //various values to hold panning, rotation and scale values
   var totalRotation = 0;
@@ -47,6 +49,8 @@ HuddleCanvas = (function() {
   var scaleOffsetX = 0;
   var scaleOffsetY = 0;
 
+  var hammertime;
+  var doInteraction;
 
   //set default values for settings
   var settings = {
@@ -80,6 +84,16 @@ HuddleCanvas = (function() {
     }
   }
 
+  var draw = false;
+  function repeatOften() {
+    // Do whatever
+    if (moveData)
+      moveCanvas("#" + huddleContainerId, moveData.x, moveData.y, moveData.scaleX, moveData.scaleY, moveData.ratioX, moveData.ratioY, moveData.angle);
+
+    if (draw)
+      window.requestAnimationFrame(repeatOften);
+  }
+
   //called on HuddleCanvas.create(...)
   function publicInit(computerVisionServer, computerVisionPort, options) {
     huddle = Huddle.client();
@@ -88,6 +102,11 @@ HuddleCanvas = (function() {
       v1x = 0;
       v1y = 0;
       v1z = 0;
+
+      draw = true;
+      window.requestAnimationFrame(repeatOften);
+    }).on('devicelost', function() {
+      draw = false;
     });
 
     //get our settings values
@@ -158,6 +177,28 @@ HuddleCanvas = (function() {
     return this;
   }
 
+  function publicEnableInteraction() {
+    // hammer is already enabled
+    if (hammertime) return;
+
+    var hammerCanvas = document.getElementsByTagName("body")[0];
+    hammertime = new Hammer(hammerCanvas);
+
+    hammertime.get('rotate').set({
+      enable: true
+    });
+
+    hammertime.get('pinch').set({
+      enable: true
+    });
+
+    hammertime.on('pan rotate pinch', doInteraction);
+  }
+
+  function publicDisableInteraction() {
+    hammertime.off('pan rotate pinch', doInteraction);
+    hammertime = null;
+  }
 
   //various getters
   function publicGetHuddleSessionServer() {
@@ -502,7 +543,7 @@ HuddleCanvas = (function() {
 
 
       //Called on receiving of Huddle API data to move the canvases
-      function moveCanvas(id, x, y, scaleX, scaleY, ratioX, ratioY, rotation) {
+      moveCanvas = function(id, x, y, scaleX, scaleY, ratioX, ratioY, rotation) {
 
         //work out some values for canvas movement
         deviceCenterToDeviceLeft = ((feedWidth / ratioX) / 2);
@@ -720,7 +761,16 @@ HuddleCanvas = (function() {
 
         //update the canvas position
         if (!settings.accStabilizerEnabled || acc || initialMove) {
-          moveCanvas("#" + huddleContainerId, x, y, scaleX, scaleY, ratio.X, ratio.Y, angle);
+          moveData = {
+            x: x,
+            y: y,
+            scaleX: scaleX,
+            scaleY: scaleY,
+            ratioX: ratio.X,
+            ratioY: ratio.Y,
+            angle: angle
+          };
+
           initialMove = false;
         }
       });
@@ -755,22 +805,9 @@ HuddleCanvas = (function() {
           }
         }
 
-        var hammerCanvas = document.getElementsByTagName("body")[0];
-        var hammertime = new Hammer(hammerCanvas);
-
-        hammertime.get('rotate').set({
-          enable: true
-        });
-
-        hammertime.get('pinch').set({
-          enable: true
-        });
-
         var prevTouch;
-
-        hammertime.on('pan rotate pinch', function(ev) {
+        doInteraction = function(ev) {
           ev.preventDefault();
-
 
           //we don't pan if the pan lock is on
           if (panLocked == true) {
@@ -857,8 +894,6 @@ HuddleCanvas = (function() {
 
           }
 
-
-
           PanPosition.update(sessionOffsetId, {
             $set: {
               inPanOffsetX: inPanOffsetX,
@@ -866,10 +901,7 @@ HuddleCanvas = (function() {
             }
           });
 
-
           if (ev.isFinal) {
-
-
             //handle the inertia of the canvas
             var velocityX = prevTouch.velocityX;
             var velocityY = prevTouch.velocityY;
@@ -890,8 +922,6 @@ HuddleCanvas = (function() {
             inPanOffsetX = 0;
             inPanOffsetY = 0;
 
-
-
             //update our final offset and set the current panning position to 0
             PanPosition.update(sessionOffsetId, {
               $set: {
@@ -907,9 +937,10 @@ HuddleCanvas = (function() {
             }
           }
           prevTouch = ev;
-        });
-      }
+        };
 
+        publicEnableInteraction();
+      }
 
       function applyInertia(angle, velocityXHammer, velocityYHammer, sessionOffsetId) {
 
@@ -963,6 +994,8 @@ HuddleCanvas = (function() {
     debugAppend: publicDebugAppend,
     debugWrite: publicDebugWrite,
     addLayer: publicAddLayer,
+    enableInteraction: publicEnableInteraction,
+    disableInteraction: publicDisableInteraction,
     removeLayer: publicRemoveLayer,
     getOffsets: publicGetOffsets,
     panLock: publicPanLock,
