@@ -56,7 +56,7 @@ HuddleCanvas = (function() {
   var settings = {
     showDebugBox: false,
     panningEnabled: true,
-    imgSrcPath: "",
+    backgroundImage: "",
     layers: [],
     onLoadCallback: function() {},
     onMoveCallback: function() {},
@@ -85,13 +85,13 @@ HuddleCanvas = (function() {
   }
 
   var draw = false;
-  function repeatOften() {
+  function drawCanvas() {
     // Do whatever
     if (moveData)
       moveCanvas("#" + huddleContainerId, moveData.x, moveData.y, moveData.scaleX, moveData.scaleY, moveData.ratioX, moveData.ratioY, moveData.angle);
 
     if (draw)
-      window.requestAnimationFrame(repeatOften);
+      window.requestAnimationFrame(drawCanvas);
   }
 
   //called on HuddleCanvas.create(...)
@@ -104,7 +104,7 @@ HuddleCanvas = (function() {
       v1z = 0;
 
       draw = true;
-      window.requestAnimationFrame(repeatOften);
+      window.requestAnimationFrame(drawCanvas);
     }).on('devicelost', function() {
       draw = false;
     });
@@ -118,7 +118,7 @@ HuddleCanvas = (function() {
         settings.showDebugBox = options.showDebugBox;
       }
       if (options.backgroundImage !== undefined) {
-        settings.imgSrcPath = options.backgroundImage;
+        settings.backgroundImage = options.backgroundImage;
       }
       if (options.scalingEnabled !== undefined) {
         settings.scalingEnabled = options.scalingEnabled;
@@ -196,8 +196,19 @@ HuddleCanvas = (function() {
   }
 
   function publicDisableInteraction() {
+    if (!hammertime) return;
+
     hammertime.off('pan rotate pinch', doInteraction);
     hammertime = null;
+  }
+
+  function publicDestroy() {
+    if (huddle) {
+      // huddle.off("proximity");
+      // huddle.off("devicefound");
+      // huddle.off("devicelost");
+      huddle.disconnect();
+    }
   }
 
   //various getters
@@ -387,14 +398,133 @@ HuddleCanvas = (function() {
     }
   }
 
+  var resetCanvasPosition = function() {
+    // remove old canvas pan/zoom/rotate positions
+    var canvasPositions = PanPosition.findOne({ sessionId: sessionServer });
+    PanPosition.update(canvasPositions._id, {
+      $set: {
+        offsetX: 0,
+        offsetY: 0,
+        inPanOffsetX: 0,
+        inPanOffsetY: 0,
+        rotationOffset: 0,
+        finalRotationOffset: 0,
+        rotationOffsetX: 0,
+        rotationOffsetY: 0,
+        scaleOffset: 1,
+        finalScaleOffset: 1,
+        scaleOffsetX: 0,
+        scaleOffsetY: 0
+      }
+    });
+  };
+
+  var setBackgroundImage = function(imageSource) {
+
+    resetCanvasPosition();
+
+    var img = document.createElement('img');
+    img.src = imageSource;
+
+    //get width and height after image loaded
+    img.onload = function() {
+      imageWidth = (img.width);
+      imageHeight = (img.height);
+
+      //set the metadata, used to scale image on retina devices
+      window.peepholeMetadata = {
+        canvasWidth: imageWidth,
+        canvasHeight: imageHeight,
+        scaleX: 1.0,
+        scaleY: 1.0
+      };
+      window.canvasScaleFactor = devicePixelRatio;
+
+      //Sizings following are initial, the canvases are resized to fit video feed area later
+
+      //set up container with correct width and height
+      $("#" + huddleContainerId).css('width', imageWidth);
+      $("#" + huddleContainerId).css('height', imageHeight);
+
+      // remove old background if exists
+      var $canvasBackground = $('#huddle-canvas-background');
+      if ($canvasBackground.length) {
+        $canvasBackground.remove();
+      }
+
+      //set up the div with correct width and height for image
+      var $backgroundContainer = $('<div id="huddle-canvas-background"></div>');
+      $('#' + huddleContainerId).append($backgroundContainer);
+
+      var tileWidth = 500;
+      var tileHeight = 500;
+      $backgroundContainer.css({
+        'width': imageWidth + 'px',
+        'height': imageHeight + 'px',
+        'z-index': 0
+      })
+
+      //set up the tiles if they're being used
+      if (settings.useTiles) {
+
+        for (var y = 0; y < imageHeight; y += tileHeight) {
+          for (var x = 0; x < imageWidth; x += tileWidth) {
+            $backgroundContainer.append('<div class="tile" id="tile-' + x + '-' + y + '"></div>')
+            $('#tile-' + x + '-' + y).css({
+              'position': 'absolute',
+              'top': y + 'px',
+              'left': x + 'px',
+              'width': tileWidth,
+              'height': tileHeight,
+              'background-image': 'url(\'../../tiles/tile-' + x + '-' + y + '.png\')',
+              'background-repeat': 'no-repeat'
+            });
+          }
+        }
+      }
+      //if not just prepare conventional background
+      else {
+        $backgroundContainer.css({
+          'background-repeat': 'no-repeat',
+          'z-index': 0,
+          'background-image': 'url(' + imageSource + ')',
+          'position': 'absolute',
+          'background-position': 'left top',
+          'background-size': 'contain'
+        });
+      }
+
+      //finally add our background layer to the list of layers
+      settings.layers.push("huddle-canvas-background");
+
+      //get all the layers including background
+      var children = $('#' + huddleContainerId).children()
+
+      //set all layers to correct width/height, only show layers in the 'layers list'
+      children.css({
+        'width': imageWidth,
+        'height': imageHeight,
+        'position': 'absolute',
+        display: function() {
+          for (c = 0; c < settings.layers.length; c++) {
+            if (settings.layers[c] === this.id || $(this).hasClass(settings.layers[c]) || this.id === "huddle-canvas-background") {
+              return 'inline'
+            }
+          }
+          return 'none';
+        }
+      });
+    }
+  };
+
   //This is where the magic happens :)
   function loadCanvas() {
     $(document).ready(function() {
 
       //show debug box if it's turned on
       if (settings.showDebugBox) {
-        $('body').prepend("<div id='debug-box'>DEBUG MESSAGES WILL APPEAR HERE</div>");
-        $("#debug-box").css({
+        $('body').prepend('<div id="debug-box">DEBUG MESSAGES WILL APPEAR HERE</div>');
+        $('#debug-box').css({
           'height': '200px',
           'width': '300px',
           'padding': '5px',
@@ -412,11 +542,9 @@ HuddleCanvas = (function() {
         });
       }
 
-
       //add a touch overlay to ensure our panning works nicely
-      $('#' + huddleContainerId).prepend("<div id=\"touchoverlay\" style=\"z-index:1;\"></div>");
+      $('#' + huddleContainerId).prepend('<div id="touchoverlay" style="z-index:1;"></div>');
       settings.layers.push('touchoverlay');
-
 
       //get the viewport size
       var windowWidth = $(window).width();
@@ -425,10 +553,8 @@ HuddleCanvas = (function() {
       //Stores the unique mongo ID from the PanPosition collection of this session's offset values
       var sessionOffsetId = "";
 
-
       //get pixel ratio, not supported by all browsers so default to 1
       var devicePixelRatio = window.devicePixelRatio || 1.0;
-
 
       //offsets from touch panning
       var offsetX = 0;
@@ -438,97 +564,8 @@ HuddleCanvas = (function() {
       var inPanOffsetY = 0;
 
       //load the image we're going to use as the background so we can get its width and height
-      if (settings.imgSrcPath) {
-        var img = document.createElement('img');
-        img.src = settings.imgSrcPath;
-
-
-        //get width and height after image loaded
-        img.onload = function() {
-          imageWidth = (img.width);
-          imageHeight = (img.height);
-
-
-          //set the metadata, used to scale image on retina devices
-          window.peepholeMetadata = {
-            canvasWidth: imageWidth,
-            canvasHeight: imageHeight,
-            scaleX: 1.0,
-            scaleY: 1.0
-          };
-          window.canvasScaleFactor = devicePixelRatio;
-
-          //Sizings following are initial, the canvases are resized to fit video feed area later
-
-          //set up container with correct width and height
-          $("#" + huddleContainerId).css('width', imageWidth);
-          $("#" + huddleContainerId).css('height', imageHeight);
-
-          //set up the div with correct width and height for image
-          var backgroundDiv = document.createElement('div');
-          backgroundDiv.id = "huddle-canvas-background";
-          document.getElementById(huddleContainerId).appendChild(backgroundDiv);
-
-          var tileWidth = 500;
-          var tileHeight = 500;
-          $('#huddle-canvas-background').css({
-            'width': imageWidth + 'px',
-            'height': imageHeight + 'px',
-            'z-index': 0
-          })
-
-          //set up the tiles if they're being used
-          if (settings.useTiles) {
-
-            for (var y = 0; y < imageHeight; y += tileHeight) {
-              for (var x = 0; x < imageWidth; x += tileWidth) {
-                $('#huddle-canvas-background').append('<div class="tile" id="tile-' + x + '-' + y + '"></div>')
-                $('#tile-' + x + '-' + y).css({
-                  'position': 'absolute',
-                  'top': y + 'px',
-                  'left': x + 'px',
-                  'width': tileWidth,
-                  'height': tileHeight,
-                  'background-image': 'url(\'../../tiles/tile-' + x + '-' + y + '.png\')',
-                  'background-repeat': 'no-repeat'
-                });
-              }
-            }
-          }
-          //if not just prepare conventional background
-          else {
-            $("#huddle-canvas-background").css('background-repeat', 'no-repeat');
-            $("#huddle-canvas-background").css('z-index', 0);
-            $("#huddle-canvas-background").css('background-image', 'url(' + settings.imgSrcPath + ')');
-            $("#huddle-canvas-background").css('position', 'absolute');
-            $("#huddle-canvas-background").css('background-position', 'left top');
-            $("#huddle-canvas-background").css('background-size', 'contain');
-
-          }
-
-          //finally add our background layer to the list of layers
-          settings.layers.push("huddle-canvas-background");
-
-          //get all the layers including background
-          var children = $('#' + huddleContainerId).children()
-
-          //set all layers to correct width/height, only show layers in the 'layers list'
-          children.css({
-            'width': imageWidth,
-            'height': imageHeight,
-            'position': 'absolute',
-            'display': function() {
-              for (c = 0; c < settings.layers.length; c++) {
-                if (settings.layers[c] === this.id || $(this).hasClass(settings.layers[c]) || this.id === "huddle-canvas-background") {
-                  return 'inline'
-                }
-              }
-              return 'none';
-            }
-          });
-        }
-
-
+      if (settings.backgroundImage) {
+        setBackgroundImage(settings.backgroundImage);
       }
 
       window.canvasScaleFactor = devicePixelRatio;
@@ -990,7 +1027,12 @@ HuddleCanvas = (function() {
   //the HuddleCanvas object with publicly accessible functions
   return {
     create: publicInit,
+    destroy: publicDestroy,
     settings: settings,
+    huddle: function() {
+      return huddle;
+    },
+    setBackgroundImage: setBackgroundImage,
     debugAppend: publicDebugAppend,
     debugWrite: publicDebugWrite,
     addLayer: publicAddLayer,

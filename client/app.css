@@ -1,22 +1,119 @@
-#ui-layer {
+.menu-button {
+	color: black;
+	background-color: rgba(255, 255, 255, 0.5);
+	border: 2px solid black;
+}
+
+#help-button-div {
 	position: absolute;
-	top: 0px; 
-	right: 0px;	
-	background-color: #00FF00;
-	z-index: 10;
-}
-
-#waldo-button-div {
+	top: 10px;
+	right: 10px;
 	z-index: 11;
-	font-size: 30px;
+	font-size: 25px;
 	width: 100px;
-	color: #000000;
-	background-color: #AAAAAA;
-	border: 5px solid;
+	height: 130px;
 }
 
-#waldo-button-icon-div {
+#help-button-icon-div {
 	color: #000000;
-	margin-left: auto;
-	margin-right: auto;
+	margin-left: 8px;
+	margin-top: 0px;
+}
+
+#change-button-div {
+	position: absolute;
+	bottom: 10px;
+	right: 10px;
+	z-index: 11;
+	font-size: 25px;
+	width: 100px;
+	height: 130px;
+}
+
+#change-button-icon-div {
+	color: #000000;
+	margin-left: 10px;
+	margin-top: 22px;
+}
+
+.map-menu-background {
+	z-index: 10;
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	width: 100%;
+	height: 100%;
+	background-color: white;
+	opacity: 0.5;
+}
+
+.map-menu {
+	z-index: 10;
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	width: 100%;
+	height: 100%;
+}
+
+.map-menu table {
+	width: 70%;
+	height: 100%;
+	-webkit-transform: rotate(-90deg) translate(0px, 100px);
+}
+
+.map-menu table tr td {
+	padding: 10px;
+}
+
+.map-layer-type {
+	width: 100%;
+	height: 100%;
+	border: 1px solid gray;
+}
+
+.map-label {
+	position: relative;
+	width: 300px;
+	top: 30px;
+	left: 0;
+	padding: 10px;
+	background-color: white;
+	opacity: 0.7;
+}
+
+.map-label span {
+	font-size: 40px;
+}
+
+.map-roadmap {
+	/*position: relative;
+	top: 0;
+	left: 0;*/
+	/*background-color: red;*/
+	background-image: url('images/roadmap.png');
+}
+
+.map-satellite {
+	/*position: relative;
+	top: 0;
+	right: 0;*/
+	/*background-color: blue;*/
+	background-image: url('images/satellite.png');
+}
+
+.map-terrain {
+	/*position: relative;
+	bottom: 0;
+	left: 0;*/
+	/*background-color: yellow;*/
+	background-image: url('images/terrain.png');
+}
+
+.map-hybrid {
+	/*position: relative;
+	bottom: 0;
+	right: 0;*/
+	/*background-color: pink;*/
+	background-image: url('images/hybrid.png');
 }

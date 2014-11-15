@@ -69,18 +69,37 @@ if (Meteor.isClient) {
     if (appMode === undefined)
       appMode = AppModes.Waldo.key;
 
-    // canvas = HuddleCanvas.create("orbiter.huddlelamp.org", 53084,
+    Session.set("host", host);
+    Session.set("port", port);
+    Session.set("appMode", appMode);
+
     var canvas = HuddleCanvas.create(host, port, {
-      scalingEnabled: (appMode == AppModes.Waldo.key) ? false : true,
-      rotationEnabled: true,
+      scalingEnabled: false,
+      rotationEnabled: false,
       panningEnabled: (appMode == AppModes.Waldo.key) ? false : true,
       disableFlickPan: true,
       useTiles: false,
-      showDebugBox: true,
+      showDebugBox: false,
       accStabilizerEnabled: true,
       accStabilizerThreshold: 0.07,
       backgroundImage: (appMode == AppModes.Waldo.key) ? "/waldogame.png" : "/hybrid.png",
       layers: ["ui-layer"]
+    });
+
+    canvas.huddle().on('proximity', function(data) {
+
+      var angle = data.Orientation % 360;
+
+      var orientation = Session.get("deviceOrientation");
+
+      if ((angle > 80 && angle < 100)) {
+        if (orientation != "portrait")
+          Session.set("deviceOrientation", "portrait");
+      }
+      else {
+        if (orientation != "landscape")
+          Session.set("deviceOrientation", "landscape");
+      }
     });
 
     return canvas;
@@ -95,6 +114,13 @@ if (Meteor.isClient) {
     // do connect to Huddle Engine, otherwise show connection dialog
     connect();
   }
+
+  Template.canvas.helpers({
+
+    isPortraitAndMap: function() {
+      return Session.get("deviceOrientation") === "portrait" && Session.get("appMode") === AppModes.Map.key ? true : false;
+    }
+  });
 
   /**
    * Render the connection dialog.
@@ -158,25 +184,125 @@ if (Meteor.isClient) {
     }
   });
 
-  // Legend button
   Template.canvas.events({
-    'touchstart #waldo-button-icon-div': function(e, tmpl) {
+    'mousedown #help-button-icon-div, touchstart #help-button-icon-div': function(e, tmpl) {
       canvas.disableInteraction();
 
-      $('#waldo-dialog').modal({
-        backdrop: false,
-        keyboard: false,
-        show: true
-      });
-    }
-  });
+      var appMode = Session.get("appMode");
 
-  Template.waldoDialog.events({
+      if (appMode == AppModes.Waldo.key) {
+        $('#waldohelp-dialog').modal({
+          backdrop: false,
+          keyboard: false,
+          show: true
+        });
+      }
 
-    'touchstart .dismiss-waldo-dialog': function(e, tmpl) {
-      $('#waldo-dialog').modal('hide');
+      if (appMode == AppModes.Map.key) {
+        $('#maphelp-dialog').modal({
+          backdrop: false,
+          keyboard: false,
+          show: true
+        });
+      }
+    },
+
+    'mousedown #change-button-icon-div, touchstart #change-button-icon-div': function(e, tmpl) {
+
+      canvas.disableInteraction();
+
+      var appMode = Session.get("appMode");
+
+      if (appMode == AppModes.Map.key) {
+        appMode = AppModes.Waldo.key;
+      }
+      else {
+        appMode = AppModes.Map.key;
+      }
+
+      canvas.settings.panningEnabled = (appMode === AppModes.Waldo.key) ? false : true;
+      canvas.setBackgroundImage(appMode === AppModes.Waldo.key ? "/waldogame.png" : "/hybrid.png");
+
+      Session.set("appMode", appMode);
 
       canvas.enableInteraction();
     }
+  });
+
+  Template.waldoHelpDialog.events({
+
+    'mousedown .dismiss-waldohelp-dialog, touchstart .dismiss-waldohelp-dialog': function(e, tmpl) {
+      $('#waldohelp-dialog').modal('hide');
+
+      canvas.enableInteraction();
+    }
+  });
+
+  Template.mapHelpDialog.events({
+
+    'mousedown .dismiss-maphelp-dialog, touchstart .dismiss-maphelp-dialog': function(e, tmpl) {
+      $('#maphelp-dialog').modal('hide');
+
+      canvas.enableInteraction();
+    }
+  });
+
+  Template.mapMenu.events({
+
+    'mouseup .map-roadmap, touchend .map-roadmap': function(e, tmpl) {
+      e.preventDefault();
+
+      console.log('roadmap');
+
+      canvas.disableInteraction();
+
+      var appMode = Session.get("appMode");
+
+      canvas.setBackgroundImage("/roadmap.png");
+
+      canvas.enableInteraction();
+    },
+
+    'mouseup .map-satellite, touchend .map-satellite': function(e, tmpl) {
+      e.preventDefault();
+
+      console.log('satellite');
+
+      canvas.disableInteraction();
+
+      var appMode = Session.get("appMode");
+
+      canvas.setBackgroundImage("/satellite.png");
+
+      canvas.enableInteraction();
+    },
+
+    'mouseup .map-terrain, touchend .map-terrain': function(e, tmpl) {
+      e.preventDefault();
+
+      console.log('terrain');
+
+      canvas.disableInteraction();
+
+      var appMode = Session.get("appMode");
+
+      canvas.setBackgroundImage("/terrain.png");
+
+      canvas.enableInteraction();
+    },
+
+    'mouseup .map-hybrid, touchend .map-hybrid': function(e, tmpl) {
+      e.preventDefault();
+
+      console.log('hybrid');
+
+      canvas.disableInteraction();
+
+      var appMode = Session.get("appMode");
+
+      canvas.setBackgroundImage("/hybrid.png");
+
+      canvas.enableInteraction();
+    },
   });
 }

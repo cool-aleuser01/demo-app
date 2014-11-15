@@ -7,17 +7,25 @@
 
   {{> connectionDialog}}
 
-  {{> waldoDialog}}
+  {{> waldoHelpDialog}}
+
+  {{> mapHelpDialog}}
 </template>
 
 <template name="canvas">
-  <div id="ui-layer">
-    <div id="waldo-button-div">
-      <div id="waldo-button-icon-div">
-        <i class="fa fa-question fa-5x"></i>
-      </div>
+  <div id="help-button-div" class="menu-button">
+    <div id="help-button-icon-div">
+      <i class="fa fa-question fa-5x"></i>
     </div>
   </div>
+  <div id="change-button-div" class="menu-button">
+    <div id="change-button-icon-div">
+      <i class="fa fa-exchange fa-3x"></i>
+    </div>
+  </div>
+  {{#if isPortraitAndMap}}
+    {{> mapMenu}}
+  {{/if}}
   <div id="huddle-canvas-container">
   </div>
 </template>
@@ -84,8 +92,8 @@
 </template>
 
 
-<template name="waldoDialog">
-  <div id="waldo-dialog" class="modal fade">
+<template name="waldoHelpDialog">
+  <div id="waldohelp-dialog" class="modal fade">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
@@ -93,13 +101,72 @@
         </div>
         <div class="modal-body">
           <img width=580 height=300 src="../../tosearch.jpg"/>
-          </div>
+        </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-primary dismiss-waldo-dialog">
+          <button type="button" class="btn btn-primary dismiss-waldohelp-dialog">
             <h1>&nbsp;OK!&nbsp;</h1>
           </button>
         </div>
       </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
   </div><!-- /.modal -->
+</template>
+
+<template name="mapHelpDialog">
+  <div id="maphelp-dialog" class="modal fade">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title">Explore this map of Dresden by moving your tablet.<br>Change map layers by rotating your tablet into portrait mode.</h1>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary dismiss-maphelp-dialog">
+            <h1>&nbsp;OK!&nbsp;</h1>
+          </button>
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
+</template>
+
+<template name="mapMenu">
+  <div class="map-menu-background"></div>
+  <div class="map-menu">
+    <table>
+      <tr>
+        <td>
+          <div class="map-layer-type map-roadmap">
+            <div class="map-label">
+              <span>Roadmap</span>
+            </div>
+          </div>
+        </td>
+        <td>
+          <div class="map-layer-type map-satellite">
+            <div class="map-label">
+              <span>Satellite</span>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <div class="map-layer-type map-terrain">
+            <div class="map-label">
+              <span>Terrain</span>
+            </div>
+          </div>
+        </td>
+        <td>
+          <div class="map-layer-type map-hybrid">
+            <div class="map-label">
+              <span>Hybrid</span>
+            </div>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </div>
 </template>
