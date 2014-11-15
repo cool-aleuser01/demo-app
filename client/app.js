@@ -1,8 +1,24 @@
 if (Meteor.isClient) {
 
-  var WALDO = 0;
-  var MAP = 1;
-  var appMode = MAP;
+  var AppModes = {
+    Waldo: {
+      key: "waldo",
+      name: "Where is Waldo?"
+    },
+    Map: {
+      key: "map",
+      name: "Humanitarian Map"
+    }
+  };
+
+  var appModes = _.map(AppModes, function(value, key) {
+    return {
+      key: value.key,
+      value: value.name
+    };
+  });
+
+  Session.setDefault("appModes", appModes);
 
   // make canvas accessible outside of the createCanvas function
   var canvas;
@@ -29,10 +45,12 @@ if (Meteor.isClient) {
   var connect = function() {
     var host = getParameterByName("host");
     var port = parseInt(getParameterByName("port"));
+    var appMode = getParameterByName("appMode");
 
     if (!host || !port) {
       host = Session.get("host");
       port = Session.get("port");
+      appMode = Session.get("appMode");
     }
 
     if (host && port) {
@@ -47,18 +65,21 @@ if (Meteor.isClient) {
     }
   };
 
-  var createCanvas = function(newhost, newport, newappmode) {
+  var createCanvas = function(host, port, appMode) {
+    if (appMode === undefined)
+      appMode = AppModes.Waldo.key;
+
     // canvas = HuddleCanvas.create("orbiter.huddlelamp.org", 53084,
-    var canvas = HuddleCanvas.create(newhost, newport, {
-      scalingEnabled: (newappmode == WALDO) ? false : true,
+    var canvas = HuddleCanvas.create(host, port, {
+      scalingEnabled: (appMode == AppModes.Waldo.key) ? false : true,
       rotationEnabled: true,
-      panningEnabled: (newappmode == WALDO) ? false : true,
+      panningEnabled: (appMode == AppModes.Waldo.key) ? false : true,
       disableFlickPan: true,
       useTiles: false,
       showDebugBox: true,
       accStabilizerEnabled: true,
       accStabilizerThreshold: 0.07,
-      backgroundImage: (newappmode == WALDO) ? "/waldogame.png" : "/hybrid.png",
+      backgroundImage: (appMode == AppModes.Waldo.key) ? "/waldogame.png" : "/hybrid.png",
       layers: ["ui-layer"]
     });
 
@@ -82,6 +103,7 @@ if (Meteor.isClient) {
     $('#connection-dialog').on('hidden.bs.modal', function (e) {
       var host = $('#client-host').val();
       var port = parseInt($('#client-port').val());
+      var appMode = $('#app-mode').val();
 
       canvas = createCanvas(host, port, appMode);
     });
@@ -92,9 +114,11 @@ if (Meteor.isClient) {
     absoluteUrl: function() {
       var host = Session.get("host") ? Session.get("host") : "localhost";
       var port = Session.get("port") ? Session.get("port") : 1948;
+      var appMode = Session.get("appMode") ? Session.get("appMode") : AppModes.Waldo.key;
 
       var parameters = "?host=" + host;
       parameters += "&port=" + port;
+      parameters += "&appMode=" + appMode;
       return Meteor.absoluteUrl(parameters);
     },
 
@@ -104,6 +128,10 @@ if (Meteor.isClient) {
 
     port: function() {
       return Session.get("port");
+    },
+
+    appModes: function() {
+      return Session.get("appModes");
     }
   });
 
@@ -122,6 +150,11 @@ if (Meteor.isClient) {
       catch (err) {
         // ignore err
       }
+    },
+
+    'change #app-mode': function(e, tmpl) {
+      var appMode = $('#app-mode').val();
+      Session.set("appMode", appMode);
     }
   });
 
@@ -141,7 +174,7 @@ if (Meteor.isClient) {
   Template.waldoDialog.events({
 
     'touchstart .dismiss-waldo-dialog': function(e, tmpl) {
-      $('#waldo-dialog').modal('hide'); 
+      $('#waldo-dialog').modal('hide');
 
       canvas.enableInteraction();
     }
