@@ -7,13 +7,13 @@
 
   {{> connectionDialog}}
 
-  {{> legendDialog}}
+  {{> waldoDialog}}
 </template>
 
 <template name="canvas">
   <div id="ui-layer">
-    <div id="help-button-div">
-      <div id="help-button-icon-div">
+    <div id="waldo-button-div">
+      <div id="waldo-button-icon-div">
         <i class="fa fa-question fa-5x"></i>
       </div>
     </div>
@@ -73,8 +73,8 @@
 </template>
 
 
-<template name="legendDialog">
-  <div id="legend-dialog" class="modal fade">
+<template name="waldoDialog">
+  <div id="waldo-dialog" class="modal fade">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
@@ -84,7 +84,7 @@
           <img width=580 height=300 src="../../tosearch.jpg"/>
           </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-primary" data-dismiss="modal">
+          <button type="button" class="btn btn-primary dismiss-waldo-dialog">
             <h1>&nbsp;OK!&nbsp;</h1>
           </button>
         </div>

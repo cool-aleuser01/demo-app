@@ -959,6 +959,7 @@ HuddleCanvas = (function() {
   //the HuddleCanvas object with publicly accessible functions
   return {
     create: publicInit,
+    settings: settings,
     debugAppend: publicDebugAppend,
     debugWrite: publicDebugWrite,
     addLayer: publicAddLayer,

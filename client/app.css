@@ -6,7 +6,7 @@
 	z-index: 10;
 }
 
-#help-button-div {
+#waldo-button-div {
 	z-index: 11;
 	font-size: 30px;
 	width: 100px;
@@ -15,7 +15,7 @@
 	border: 5px solid;
 }
 
-#help-button-icon-div {
+#waldo-button-icon-div {
 	color: #000000;
 	margin-left: auto;
 	margin-right: auto;

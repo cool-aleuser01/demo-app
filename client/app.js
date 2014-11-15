@@ -2,7 +2,7 @@ if (Meteor.isClient) {
 
   var WALDO = 0;
   var MAP = 1;
-  var appMode = WALDO;
+  var appMode = MAP;
 
   /**
    * Get url parameter, e.g., http://localhost:3000/?id=3 -> id = 3
@@ -46,15 +46,15 @@ if (Meteor.isClient) {
 
   var createCanvas = function(newhost, newport, newappmode) {  
     // canvas = HuddleCanvas.create("orbiter.huddlelamp.org", 53084,
-    var newcanvas = HuddleCanvas.create(newhost, newport, {
-      scalingEnabled: (newappmode == WALDO) ? false : true,
+    canvas = HuddleCanvas.create(newhost, newport, {
+      scalingEnabled: false,
       rotationEnabled: false,
       panningEnabled: (newappmode == WALDO) ? false : true,
       useTiles: false,
       showDebugBox: true,
       accStabilizerEnabled: true,
       accStabilizerThreshold: 0.07,
-      backgroundImage: (newappmode == WALDO) ? "/tiles/waldogame.png" : "/tiles/map.png",
+      backgroundImage: (newappmode == WALDO) ? "/waldogame.png" : "/hybrid.png",
       layers: ["ui-layer"]
     });
 
@@ -125,12 +125,23 @@ if (Meteor.isClient) {
 
   // Legend button
   Template.canvas.events({
-    'touchend #help-button-icon-div': function(e, tmpl) {
-      $('#legend-dialog').modal({
+    'touchend #waldo-button-icon-div': function(e, tmpl) {
+      canvas.disableInteraction();
+
+      $('#waldo-dialog').modal({
         backdrop: false,
         keyboard: false,
         show: true
       });
+    }
+  });
+
+  Template.waldoDialog.events({
+
+    'click .dismiss-waldo-dialog': function(e, tmpl) {
+      $('#waldo-dialog').modal('hide'); 
+
+      canvas.enableInteraction();
     }
   });
 }
