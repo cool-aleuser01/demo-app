@@ -1,0 +1,94 @@
+<body>
+  {{> main}}
+</body>
+
+<template name="main">
+  {{> canvas}}
+
+  {{> connectionDialog}}
+
+  {{> legendDialog}}
+</template>
+
+<template name="canvas">
+  <div id="ui-layer">
+    <div id="help-button-div">
+      <div id="help-button-icon-div">
+        <i class="fa fa-question fa-5x"></i>
+      </div>
+    </div>
+  </div>
+  <div id="huddle-canvas-container">
+  </div>
+</template>
+
+<template name="connectionDialog">
+  <div id="connection-dialog" class="modal fade">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Connection</h4>
+        </div>
+        <div class="modal-body">
+          <div class="form-horizontal" role="form">
+            <div class="form-group">
+              <label for="client-host" class="col-sm-2 control-label">Host</label>
+              <div class="col-sm-10">
+                <input id="client-host" class="form-control" type="text" value="{{host}}" placeholder="localhost" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="client-port" class="col-sm-2 control-label">Port</label>
+              <div class="col-sm-10">
+                <input id="client-port" class="form-control" type="number" value="{{port}}" placeholder="1948" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div class="col-sm-offset-2 col-sm-10">
+                <div class="checkbox">
+                  <label for="client-reconnect">
+                    <input id="client-reconnect" type="checkbox" checked> Client reconnect automatically
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="alert alert-info alert-dismissible" role="alert">
+            <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            <strong>Hint!</strong> Add <b>host</b> and <b>name</b> parameters to the url if you want to connect to the same Huddle Engine after browser reload.
+            <br />
+            <br />
+            <strong>Example</strong>
+            <br />
+            <a href="{{absoluteUrl}}">{{absoluteUrl}}</a></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-dismiss="modal">Connect</button>
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
+</template>
+
+
+<template name="legendDialog">
+  <div id="legend-dialog" class="modal fade">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title">Hey Waldo Fans! Five intrepid travellers are lost in this scene! Can you find them?</h1>
+        </div>
+        <div class="modal-body">
+          <img width=580 height=300 src="../../tosearch.jpg"/>
+          </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-dismiss="modal">
+            <h1>&nbsp;OK!&nbsp;</h1>
+          </button>
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
+</template>
