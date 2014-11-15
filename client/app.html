@@ -7,17 +7,22 @@
 
   {{> connectionDialog}}
 
-  {{> waldoDialog}}
+  {{> waldohelpDialog}}
+
+  {{> maphelpDialog}}
 </template>
 
 <template name="canvas">
-  <div id="ui-layer">
-    <div id="waldo-button-div">
-      <div id="waldo-button-icon-div">
-        <i class="fa fa-question fa-5x"></i>
-      </div>
+  <div id="help-button-div">
+    <div id="help-button-icon-div">
+      <i class="fa fa-question fa-5x"></i>
     </div>
   </div>
+  <div id="change-button-div">
+    <div id="change-button-icon-div">
+      <i class="fa fa-exchange fa-3x"></i>
+    </div>
+  </div>    
   <div id="huddle-canvas-container">
   </div>
 </template>
@@ -73,8 +78,8 @@
 </template>
 
 
-<template name="waldoDialog">
-  <div id="waldo-dialog" class="modal fade">
+<template name="waldohelpDialog">
+  <div id="waldohelp-dialog" class="modal fade">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
@@ -82,9 +87,28 @@
         </div>
         <div class="modal-body">
           <img width=580 height=300 src="../../tosearch.jpg"/>
-          </div>
+        </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-primary dismiss-waldo-dialog">
+          <button type="button" class="btn btn-primary dismiss-waldohelp-dialog">
+            <h1>&nbsp;OK!&nbsp;</h1>
+          </button>
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
+</template>
+
+<template name="maphelpDialog">
+  <div id="maphelp-dialog" class="modal fade">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title">Explore this map of Dresden by moving your tablet.<br>Change map layers by rotating your tablet into portrait mode.</h1>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary dismiss-maphelp-dialog">
             <h1>&nbsp;OK!&nbsp;</h1>
           </button>
         </div>

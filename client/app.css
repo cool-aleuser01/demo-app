@@ -1,22 +1,38 @@
-#ui-layer {
+#help-button-div {
 	position: absolute;
 	top: 0px; 
 	right: 0px;	
-	background-color: #00FF00;
-	z-index: 10;
-}
-
-#waldo-button-div {
 	z-index: 11;
-	font-size: 30px;
+	font-size: 25px;
 	width: 100px;
+	height: 130px;
 	color: #000000;
 	background-color: #AAAAAA;
 	border: 5px solid;
 }
 
-#waldo-button-icon-div {
+#help-button-icon-div {
 	color: #000000;
-	margin-left: auto;
-	margin-right: auto;
+	margin-left: 8px;
+	margin-top: 0px;
 }
+
+#change-button-div {
+	position: absolute;
+	bottom: 0px; 
+	right: 0px;	
+	z-index: 11;
+	font-size: 25px;
+	width: 100px;
+	height: 130px;
+	color: #000000;
+	background-color: #AAAAAA;
+	border: 5px solid;
+}
+
+#change-button-icon-div {
+	color: #000000;
+	margin-left: 5px;
+	margin-top: 17px;
+}
+

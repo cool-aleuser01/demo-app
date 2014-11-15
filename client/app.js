@@ -2,7 +2,7 @@ if (Meteor.isClient) {
 
   var WALDO = 0;
   var MAP = 1;
-  var appMode = MAP;
+  var appMode = WALDO;
 
   // make canvas accessible outside of the createCanvas function
   var canvas;
@@ -51,7 +51,7 @@ if (Meteor.isClient) {
     // canvas = HuddleCanvas.create("orbiter.huddlelamp.org", 53084,
     var canvas = HuddleCanvas.create(newhost, newport, {
       scalingEnabled: (newappmode == WALDO) ? false : true,
-      rotationEnabled: true,
+      rotationEnabled: false,
       panningEnabled: (newappmode == WALDO) ? false : true,
       disableFlickPan: true,
       useTiles: false,
@@ -125,25 +125,62 @@ if (Meteor.isClient) {
     }
   });
 
-  // Legend button
   Template.canvas.events({
-    'touchstart #waldo-button-icon-div': function(e, tmpl) {
+    'touchstart #help-button-icon-div': function(e, tmpl) {
       canvas.disableInteraction();
 
-      $('#waldo-dialog').modal({
-        backdrop: false,
-        keyboard: false,
-        show: true
-      });
+      if (appMode==WALDO)
+      {
+        $('#waldohelp-dialog').modal({
+          backdrop: false,
+          keyboard: false,
+          show: true
+        });        
+      }
+
+      if (appMode==MAP)
+      {
+        $('#maphelp-dialog').modal({
+          backdrop: false,
+          keyboard: false,
+          show: true
+        });        
+      }
+    },
+
+    'touchstart #change-button-icon-div': function(e, tmpl) {
+      if (appMode==MAP) 
+      { 
+        appMode = WALDO;
+      }
+      else
+      { 
+        appMode = MAP;
+      }
+      canvas.settings.scalingEnabled = (appMode == WALDO) ? false : true;
+      canvas.settings.panningEnabled = (appMode == WALDO) ? false : true;
+      canvas.settings.backgroundImage = (appMode == WALDO) ? "/waldogame.png" : "/hybrid.png";
+      window.alert("Was set to "+ ((appMode == WALDO) ? "WALDO" : "MAP") + ", background=" + 
+        canvas.settings.backgroundImage);
     }
   });
 
-  Template.waldoDialog.events({
+  Template.waldohelpDialog.events({
 
-    'touchstart .dismiss-waldo-dialog': function(e, tmpl) {
-      $('#waldo-dialog').modal('hide'); 
+    'touchstart .dismiss-waldohelp-dialog': function(e, tmpl) {
+      $('#waldohelp-dialog').modal('hide'); 
 
       canvas.enableInteraction();
     }
   });
+
+  Template.maphelpDialog.events({
+
+    'touchstart .dismiss-maphelp-dialog': function(e, tmpl) {
+      $('#maphelp-dialog').modal('hide'); 
+
+      canvas.enableInteraction();
+    }
+  });
+
 }
