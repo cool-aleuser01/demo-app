@@ -401,22 +401,25 @@ HuddleCanvas = (function() {
   var resetCanvasPosition = function() {
     // remove old canvas pan/zoom/rotate positions
     var canvasPositions = PanPosition.findOne({ sessionId: sessionServer });
-    PanPosition.update(canvasPositions._id, {
-      $set: {
-        offsetX: 0,
-        offsetY: 0,
-        inPanOffsetX: 0,
-        inPanOffsetY: 0,
-        rotationOffset: 0,
-        finalRotationOffset: 0,
-        rotationOffsetX: 0,
-        rotationOffsetY: 0,
-        scaleOffset: 1,
-        finalScaleOffset: 1,
-        scaleOffsetX: 0,
-        scaleOffsetY: 0
-      }
-    });
+
+    if (canvasPositions) {
+      PanPosition.update(canvasPositions._id, {
+        $set: {
+          offsetX: 0,
+          offsetY: 0,
+          inPanOffsetX: 0,
+          inPanOffsetY: 0,
+          rotationOffset: 0,
+          finalRotationOffset: 0,
+          rotationOffsetX: 0,
+          rotationOffsetY: 0,
+          scaleOffset: 1,
+          finalScaleOffset: 1,
+          scaleOffsetX: 0,
+          scaleOffsetY: 0
+        }
+      });
+    }
   };
 
   var setBackgroundImage = function(imageSource) {
