@@ -76,7 +76,7 @@ if (Meteor.isClient) {
     var canvas = HuddleCanvas.create(host, port, {
       scalingEnabled: false,
       rotationEnabled: false,
-      panningEnabled: (appMode == AppModes.Waldo.key) ? false : true,
+      panningEnabled: true,//(appMode === AppModes.Waldo.key) ? false : true,
       disableFlickPan: true,
       useTiles: false,
       showDebugBox: false,
@@ -185,7 +185,7 @@ if (Meteor.isClient) {
   });
 
   Template.canvas.events({
-    'mousedown #help-button-icon-div, touchstart #help-button-icon-div': function(e, tmpl) {
+    'touchend #help-button-icon-div': function(e, tmpl) {
       canvas.disableInteraction();
 
       var appMode = Session.get("appMode");
@@ -207,7 +207,7 @@ if (Meteor.isClient) {
       }
     },
 
-    'mousedown #change-button-icon-div, touchstart #change-button-icon-div': function(e, tmpl) {
+    'touchend #change-button-icon-div': function(e, tmpl) {
 
       canvas.disableInteraction();
 
@@ -231,7 +231,7 @@ if (Meteor.isClient) {
 
   Template.waldoHelpDialog.events({
 
-    'mousedown .dismiss-waldohelp-dialog, touchstart .dismiss-waldohelp-dialog': function(e, tmpl) {
+    'touchstart .dismiss-waldohelp-dialog': function(e, tmpl) {
       $('#waldohelp-dialog').modal('hide');
 
       canvas.enableInteraction();
@@ -240,7 +240,7 @@ if (Meteor.isClient) {
 
   Template.mapHelpDialog.events({
 
-    'mousedown .dismiss-maphelp-dialog, touchstart .dismiss-maphelp-dialog': function(e, tmpl) {
+    'touchstart .dismiss-maphelp-dialog': function(e, tmpl) {
       $('#maphelp-dialog').modal('hide');
 
       canvas.enableInteraction();
@@ -249,7 +249,7 @@ if (Meteor.isClient) {
 
   Template.mapMenu.events({
 
-    'mouseup .map-roadmap, touchend .map-roadmap': function(e, tmpl) {
+    'touchend .map-roadmap': function(e, tmpl) {
       e.preventDefault();
 
       console.log('roadmap');
@@ -263,7 +263,7 @@ if (Meteor.isClient) {
       canvas.enableInteraction();
     },
 
-    'mouseup .map-satellite, touchend .map-satellite': function(e, tmpl) {
+    'touchend .map-satellite': function(e, tmpl) {
       e.preventDefault();
 
       console.log('satellite');
@@ -277,7 +277,7 @@ if (Meteor.isClient) {
       canvas.enableInteraction();
     },
 
-    'mouseup .map-terrain, touchend .map-terrain': function(e, tmpl) {
+    'touchend .map-terrain': function(e, tmpl) {
       e.preventDefault();
 
       console.log('terrain');
@@ -291,7 +291,7 @@ if (Meteor.isClient) {
       canvas.enableInteraction();
     },
 
-    'mouseup .map-hybrid, touchend .map-hybrid': function(e, tmpl) {
+    'touchend .map-hybrid': function(e, tmpl) {
       e.preventDefault();
 
       console.log('hybrid');
